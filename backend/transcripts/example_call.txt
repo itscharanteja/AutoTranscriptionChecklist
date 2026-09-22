@@ -1,0 +1,11 @@
+Agent: Hi there, thanks for calling TechSupport, this is Jamie speaking.
+Customer: Hey Jamie, I'm having trouble logging into my account.
+Agent: I'm sorry to hear that. Can I get your name and the email on the account so I can pull it up?
+Customer: Sure, it's Alex Rivera, alex.rivera@email.com.
+Agent: Thanks Alex, I see your account here. So you're getting an error when you try to log in, is that right?
+Customer: Yeah, it just says "invalid password" even though I know it's correct.
+Agent: Got it. Let's go ahead and reset your password to be safe. I'll send a reset link to your email now.
+Customer: Okay, I see it. Let me try... that didn't worked.
+Agent: Oh no! I can't solve it then, Is there anything else I can help you with today?
+Customer: No I just wanted to reset the password. 
+Agent: Then maybe we should escalte this issue

@@ -1,0 +1,20 @@
+name: Support Call QA Checklist
+items:
+- id: greeting
+  description: The AGENT (not the customer), in their own line of dialogue, greets
+    the customer and states their own name.
+- id: verified_identity
+  description: The AGENT asks the customer for identifying information (e.g. name,
+    account, or order number) before discussing account details.
+- id: acknowledged_issue
+  description: The AGENT, in their own line of dialogue, restates or paraphrases the
+    specific issue the customer described.
+- id: resolution_or_next_steps
+  description: The customer explicitly confirms their issue is resolved, OR the AGENT
+    states a specific next step or timeline.
+- id: professional_tone
+  description: None of the AGENT's lines contain rude, dismissive, or impatient language.
+- id: closing
+  description: The AGENT (not the customer), in their own line of dialogue, explicitly
+    says a farewell phrase such as 'goodbye', 'have a great day', or 'take care',
+    to end the call.
