@@ -1,0 +1,203 @@
+{
+  "sample_id": "consultation_clear_001",
+  "scenario": "Clear consultation with all checklist items covered",
+  "language": "en",
+  "participants": {
+    "doctor": {
+      "speaker_id": "doctor_1",
+      "role": "doctor"
+    },
+    "patient": {
+      "speaker_id": "patient_1",
+      "role": "patient"
+    }
+  },
+  "checklist": [
+    {
+      "id": "chief_complaint",
+      "label": "Chief complaint / main problem"
+    },
+    {
+      "id": "symptom_onset",
+      "label": "When symptoms started"
+    },
+    {
+      "id": "symptom_duration",
+      "label": "Duration of symptoms"
+    },
+    {
+      "id": "pain_location",
+      "label": "Pain or symptom location"
+    },
+    {
+      "id": "pain_severity",
+      "label": "Pain severity (0-10 if applicable)"
+    },
+    {
+      "id": "associated_symptoms",
+      "label": "Associated symptoms"
+    },
+    {
+      "id": "current_medications",
+      "label": "Current medications"
+    },
+    {
+      "id": "allergies",
+      "label": "Known allergies"
+    },
+    {
+      "id": "past_medical_history",
+      "label": "Relevant past medical history"
+    },
+    {
+      "id": "family_history",
+      "label": "Relevant family medical history"
+    }
+  ],
+  "transcript_turns": [
+    {
+      "turn_id": 1,
+      "speaker": "doctor",
+      "text": "What is the main problem that brought you in today?"
+    },
+    {
+      "turn_id": 2,
+      "speaker": "patient",
+      "text": "I have a sharp pain in the lower right side of my abdomen."
+    },
+    {
+      "turn_id": 3,
+      "speaker": "doctor",
+      "text": "When did this pain start?"
+    },
+    {
+      "turn_id": 4,
+      "speaker": "patient",
+      "text": "It started yesterday evening at around 7 PM."
+    },
+    {
+      "turn_id": 5,
+      "speaker": "doctor",
+      "text": "So it has been there since yesterday evening. Has it been continuous since then?"
+    },
+    {
+      "turn_id": 6,
+      "speaker": "patient",
+      "text": "Yes, it has been there continuously for about 18 hours."
+    },
+    {
+      "turn_id": 7,
+      "speaker": "doctor",
+      "text": "Can you point to exactly where the pain is?"
+    },
+    {
+      "turn_id": 8,
+      "speaker": "patient",
+      "text": "It is mostly in the lower right abdomen."
+    },
+    {
+      "turn_id": 9,
+      "speaker": "doctor",
+      "text": "On a scale from zero to ten, how severe is the pain right now?"
+    },
+    {
+      "turn_id": 10,
+      "speaker": "patient",
+      "text": "About seven out of ten."
+    },
+    {
+      "turn_id": 11,
+      "speaker": "doctor",
+      "text": "Do you have any other symptoms such as nausea, vomiting, fever, or diarrhea?"
+    },
+    {
+      "turn_id": 12,
+      "speaker": "patient",
+      "text": "I feel nauseous and I had a mild fever last night, but no vomiting or diarrhea."
+    },
+    {
+      "turn_id": 13,
+      "speaker": "doctor",
+      "text": "Are you currently taking any medications?"
+    },
+    {
+      "turn_id": 14,
+      "speaker": "patient",
+      "text": "Yes, I take metformin 500 milligrams twice a day."
+    },
+    {
+      "turn_id": 15,
+      "speaker": "doctor",
+      "text": "Do you have any known allergies, especially medication allergies?"
+    },
+    {
+      "turn_id": 16,
+      "speaker": "patient",
+      "text": "Yes, I am allergic to penicillin. I get a rash."
+    },
+    {
+      "turn_id": 17,
+      "speaker": "doctor",
+      "text": "Do you have any previous medical conditions or major illnesses?"
+    },
+    {
+      "turn_id": 18,
+      "speaker": "patient",
+      "text": "I have type 2 diabetes, diagnosed three years ago. No other major conditions."
+    },
+    {
+      "turn_id": 19,
+      "speaker": "doctor",
+      "text": "Does anyone in your close family have diabetes, heart disease, or other significant medical conditions?"
+    },
+    {
+      "turn_id": 20,
+      "speaker": "patient",
+      "text": "My father also has type 2 diabetes. My mother has high blood pressure."
+    }
+  ],
+  "expected_checklist_evaluation": [
+    {
+      "id": "chief_complaint",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "symptom_onset",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "symptom_duration",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "pain_location",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "pain_severity",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "associated_symptoms",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "current_medications",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "allergies",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "past_medical_history",
+      "expected_status": "ANSWERED"
+    },
+    {
+      "id": "family_history",
+      "expected_status": "ANSWERED"
+    }
+  ],
+  "expected_coverage": 1.0,
+  "notes": "All 10 checklist items are explicitly asked and clearly answered."
+}

@@ -1,0 +1,28 @@
+name: Medical Consultation Checklist
+items:
+- id: chief_complaint
+  description: The PATIENT states the chief complaint or main problem that brought
+    them to the visit.
+- id: symptom_onset
+  description: The DOCTOR asks, and the PATIENT states, when the symptoms started.
+- id: symptom_duration
+  description: The DOCTOR asks, and the PATIENT states, how long the symptoms have
+    lasted.
+- id: pain_location
+  description: The DOCTOR asks, and the PATIENT states, the location of the pain or
+    symptom.
+- id: pain_severity
+  description: The DOCTOR asks, and the PATIENT states, the severity of the pain (e.g.
+    on a 0-10 scale), if applicable.
+- id: associated_symptoms
+  description: The DOCTOR asks about, and the PATIENT describes, any associated or
+    additional symptoms.
+- id: current_medications
+  description: The DOCTOR asks, and the PATIENT states, what medications they are
+    currently taking.
+- id: allergies
+  description: The DOCTOR asks, and the PATIENT states, any known allergies.
+- id: past_medical_history
+  description: The DOCTOR asks, and the PATIENT states, relevant past medical history.
+- id: family_history
+  description: The DOCTOR asks, and the PATIENT states, relevant family medical history.

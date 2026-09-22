@@ -19,6 +19,7 @@ class ItemResult:
     id: str
     description: str
     status: str  # "yes" | "no" | "unclear"
+    confidence: int  # 0-100
     evidence: str
 
 

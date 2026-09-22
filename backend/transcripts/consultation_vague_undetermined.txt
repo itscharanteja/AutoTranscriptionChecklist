@@ -1,0 +1,18 @@
+Doctor: So, how have things been?
+Patient: Not great. It's been bothering me.
+Doctor: This started recently?
+Patient: Sort of. I don't really remember.
+Doctor: And it is mainly around there?
+Patient: Yeah, kind of around that area.
+Doctor: Is it bad?
+Patient: Sometimes. Other times not really.
+Doctor: Anything else with it?
+Patient: Maybe. I felt strange earlier.
+Doctor: Are you taking the usual things?
+Patient: I take some stuff, yes.
+Doctor: And nothing important in the past?
+Patient: There was something a while ago, but I don't remember exactly.
+Doctor: Anything like that in the family?
+Patient: Possibly. I'm not sure.
+Doctor: Okay, that's fine for now.
+Patient: Okay.

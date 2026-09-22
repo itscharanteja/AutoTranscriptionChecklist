@@ -38,9 +38,13 @@ _VERDICT_TOOL = {
                 "type": "object",
                 "properties": {
                     "status": {"type": "string", "enum": ["yes", "no", "unclear"]},
+                    "confidence": {
+                        "type": "integer",
+                        "description": "Confidence in this verdict, from 0 (pure guess) to 100 (certain).",
+                    },
                     "evidence": {"type": "string", "description": "Short quote from the transcript."},
                 },
-                "required": ["status", "evidence"],
+                "required": ["status", "confidence", "evidence"],
             }
         },
     }

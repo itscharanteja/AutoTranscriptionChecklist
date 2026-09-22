@@ -1,0 +1,20 @@
+Doctor: What is the main problem that brought you in today?
+Patient: I have a sharp pain in the lower right side of my abdomen.
+Doctor: When did this pain start?
+Patient: It started yesterday evening at around 7 PM.
+Doctor: So it has been there since yesterday evening. Has it been continuous since then?
+Patient: Yes, it has been there continuously for about 18 hours.
+Doctor: Can you point to exactly where the pain is?
+Patient: It is mostly in the lower right abdomen.
+Doctor: On a scale from zero to ten, how severe is the pain right now?
+Patient: About seven out of ten.
+Doctor: Do you have any other symptoms such as nausea, vomiting, fever, or diarrhea?
+Patient: I feel nauseous and I had a mild fever last night, but no vomiting or diarrhea.
+Doctor: Are you currently taking any medications?
+Patient: Yes, I take metformin 500 milligrams twice a day.
+Doctor: Do you have any known allergies, especially medication allergies?
+Patient: Yes, I am allergic to penicillin. I get a rash.
+Doctor: Do you have any previous medical conditions or major illnesses?
+Patient: I have type 2 diabetes, diagnosed three years ago. No other major conditions.
+Doctor: Does anyone in your close family have diabetes, heart disease, or other significant medical conditions?
+Patient: My father also has type 2 diabetes. My mother has high blood pressure.

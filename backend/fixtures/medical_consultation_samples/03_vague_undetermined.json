@@ -1,0 +1,193 @@
+{
+  "sample_id": "consultation_vague_001",
+  "scenario": "Very vague consultation where checklist state cannot be reliably determined",
+  "language": "en",
+  "participants": {
+    "doctor": {
+      "speaker_id": "doctor_1",
+      "role": "doctor"
+    },
+    "patient": {
+      "speaker_id": "patient_1",
+      "role": "patient"
+    }
+  },
+  "checklist": [
+    {
+      "id": "chief_complaint",
+      "label": "Chief complaint / main problem"
+    },
+    {
+      "id": "symptom_onset",
+      "label": "When symptoms started"
+    },
+    {
+      "id": "symptom_duration",
+      "label": "Duration of symptoms"
+    },
+    {
+      "id": "pain_location",
+      "label": "Pain or symptom location"
+    },
+    {
+      "id": "pain_severity",
+      "label": "Pain severity (0-10 if applicable)"
+    },
+    {
+      "id": "associated_symptoms",
+      "label": "Associated symptoms"
+    },
+    {
+      "id": "current_medications",
+      "label": "Current medications"
+    },
+    {
+      "id": "allergies",
+      "label": "Known allergies"
+    },
+    {
+      "id": "past_medical_history",
+      "label": "Relevant past medical history"
+    },
+    {
+      "id": "family_history",
+      "label": "Relevant family medical history"
+    }
+  ],
+  "transcript_turns": [
+    {
+      "turn_id": 1,
+      "speaker": "doctor",
+      "text": "So, how have things been?"
+    },
+    {
+      "turn_id": 2,
+      "speaker": "patient",
+      "text": "Not great. It's been bothering me."
+    },
+    {
+      "turn_id": 3,
+      "speaker": "doctor",
+      "text": "This started recently?"
+    },
+    {
+      "turn_id": 4,
+      "speaker": "patient",
+      "text": "Sort of. I don't really remember."
+    },
+    {
+      "turn_id": 5,
+      "speaker": "doctor",
+      "text": "And it is mainly around there?"
+    },
+    {
+      "turn_id": 6,
+      "speaker": "patient",
+      "text": "Yeah, kind of around that area."
+    },
+    {
+      "turn_id": 7,
+      "speaker": "doctor",
+      "text": "Is it bad?"
+    },
+    {
+      "turn_id": 8,
+      "speaker": "patient",
+      "text": "Sometimes. Other times not really."
+    },
+    {
+      "turn_id": 9,
+      "speaker": "doctor",
+      "text": "Anything else with it?"
+    },
+    {
+      "turn_id": 10,
+      "speaker": "patient",
+      "text": "Maybe. I felt strange earlier."
+    },
+    {
+      "turn_id": 11,
+      "speaker": "doctor",
+      "text": "Are you taking the usual things?"
+    },
+    {
+      "turn_id": 12,
+      "speaker": "patient",
+      "text": "I take some stuff, yes."
+    },
+    {
+      "turn_id": 13,
+      "speaker": "doctor",
+      "text": "And nothing important in the past?"
+    },
+    {
+      "turn_id": 14,
+      "speaker": "patient",
+      "text": "There was something a while ago, but I don't remember exactly."
+    },
+    {
+      "turn_id": 15,
+      "speaker": "doctor",
+      "text": "Anything like that in the family?"
+    },
+    {
+      "turn_id": 16,
+      "speaker": "patient",
+      "text": "Possibly. I'm not sure."
+    },
+    {
+      "turn_id": 17,
+      "speaker": "doctor",
+      "text": "Okay, that's fine for now."
+    },
+    {
+      "turn_id": 18,
+      "speaker": "patient",
+      "text": "Okay."
+    }
+  ],
+  "expected_checklist_evaluation": [
+    {
+      "id": "chief_complaint",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "symptom_onset",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "symptom_duration",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "pain_location",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "pain_severity",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "associated_symptoms",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "current_medications",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "allergies",
+      "expected_status": "NOT_ASKED"
+    },
+    {
+      "id": "past_medical_history",
+      "expected_status": "UNCERTAIN"
+    },
+    {
+      "id": "family_history",
+      "expected_status": "UNCERTAIN"
+    }
+  ],
+  "expected_coverage": null,
+  "notes": "The conversation intentionally uses vague references, missing specifics, and uncertain answers. The model should avoid confidently marking items as ANSWERED."
+}

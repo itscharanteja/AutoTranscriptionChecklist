@@ -39,6 +39,12 @@ const STATUS_GLYPH: Record<ItemStatus, string> = {
   unclear: "?",
 };
 
+function confidenceColor(confidence: number): string {
+  if (confidence >= 80) return "blue";
+  if (confidence >= 50) return "yellow";
+  return "orange";
+}
+
 interface Props {
   checklists: Checklist[];
   checklistId: string | null;
@@ -205,9 +211,16 @@ export function ChecklistEditor({
                     </ThemeIcon>
                     <div>
                       <Text size="sm">{item.description}</Text>
-                      <Text size="xs" c="dimmed" ff="monospace">
-                        {item.id}
-                      </Text>
+                      <Group gap={6}>
+                        <Text size="xs" c="dimmed" ff="monospace">
+                          {item.id}
+                        </Text>
+                        {itemResult && (
+                          <Badge size="xs" variant="light" color={confidenceColor(itemResult.confidence)}>
+                            {itemResult.confidence}% confidence
+                          </Badge>
+                        )}
+                      </Group>
                     </div>
                   </Group>
                 );

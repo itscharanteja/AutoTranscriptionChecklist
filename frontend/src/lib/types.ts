@@ -15,6 +15,7 @@ export interface ItemResult {
   id: string;
   description: string;
   status: ItemStatus;
+  confidence: number;
   evidence: string;
 }
 

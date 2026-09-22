@@ -1,0 +1,18 @@
+Doctor: Tell me what has been bothering you.
+Patient: I have been getting headaches.
+Doctor: When did you first notice them?
+Patient: Maybe four or five days ago.
+Doctor: How long does each headache usually last?
+Patient: Usually around an hour, sometimes a bit longer.
+Doctor: Where do you feel the headache?
+Patient: Mostly around my forehead and behind my eyes.
+Doctor: How bad is it when it is at its worst?
+Patient: Maybe six out of ten.
+Doctor: Anything else happening with the headaches?
+Patient: Sometimes I feel a little sensitive to light.
+Doctor: Are you taking anything regularly?
+Patient: Only vitamin D tablets. I took paracetamol twice this week for the headache.
+Doctor: All right. Have the headaches been affecting your sleep?
+Patient: Not really. I can still sleep normally.
+Doctor: Anything else you think I should know?
+Patient: No, I think that's everything.

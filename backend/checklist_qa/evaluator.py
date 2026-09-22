@@ -15,8 +15,12 @@ SYSTEM_PROMPT = (
     "to which speaker said which line — do not credit one speaker for words said by the other. "
     "Do not infer, assume, or give credit for similar-sounding but different actions. "
     "If in doubt, answer \"no\" or \"unclear\" rather than \"yes\". "
+    "Also rate your confidence in this verdict from 0 to 100: use a low score (below 50) when the "
+    "transcript is vague, ambiguous, or you had to infer rather than read an explicit statement, "
+    "and a high score (above 80) only when the transcript is explicit and unambiguous. "
     'Respond with ONLY a JSON object of the form '
-    '{"status": "yes" | "no" | "unclear", "evidence": "<short quote from the transcript>"}. '
+    '{"status": "yes" | "no" | "unclear", "confidence": <0-100 integer>, '
+    '"evidence": "<short quote from the transcript>"}. '
     'Use "unclear" only if the transcript gives no basis to decide either way.'
 )
 
@@ -29,18 +33,22 @@ def evaluate_item(client, transcript_text: str, item: ChecklistItem) -> ItemResu
         f"Checklist item: {item.description}\n\n"
         "Respond with only the JSON object."
     )
-    status, evidence = "unclear", ""
+    status, confidence, evidence = "unclear", 0, ""
     try:
         raw = client.chat_json(SYSTEM_PROMPT, user_prompt)
         data = json.loads(raw)
         status = str(data.get("status", "unclear")).lower().strip()
         if status not in VALID_STATUSES:
             status = "unclear"
+        try:
+            confidence = max(0, min(100, int(round(float(data.get("confidence", 0))))))
+        except (TypeError, ValueError):
+            confidence = 0
         evidence = str(data.get("evidence", "")).strip()
     except Exception as exc:
         evidence = f"Evaluation failed ({type(exc).__name__}): {exc}"[:200]
 
-    return ItemResult(id=item.id, description=item.description, status=status, evidence=evidence)
+    return ItemResult(id=item.id, description=item.description, status=status, confidence=confidence, evidence=evidence)
 
 
 def _evaluate_items_concurrently(
@@ -63,7 +71,7 @@ def _evaluate_items_concurrently(
                 yield idx, future.result()
             except Exception as exc:
                 item = items[idx]
-                yield idx, ItemResult(item.id, item.description, "unclear", f"Unexpected error: {exc}"[:200])
+                yield idx, ItemResult(item.id, item.description, "unclear", 0, f"Unexpected error: {exc}"[:200])
 
 
 def evaluate_transcript(
