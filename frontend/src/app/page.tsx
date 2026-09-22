@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Button, Container, FileButton, Grid, Group, Paper, Stack, Text, Textarea, Title } from "@mantine/core";
+import { Alert, Button, Container, FileButton, Group, Paper, Stack, Tabs, Text, Textarea, Title } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { ChecklistEditor } from "@/components/ChecklistEditor";
+import { LiveCall } from "@/components/LiveCall";
 import type { Checklist, EvaluateResponse } from "@/lib/types";
 
 const PLACEHOLDER = `Agent: Hi, thanks for calling, this is Jamie.
@@ -18,7 +20,8 @@ export default function Home() {
   const [result, setResult] = useState<EvaluateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [runError, setRunError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string | null>("live");
+  const [callActive, setCallActive] = useState(false);
 
   useEffect(() => {
     fetch("/api/checklists")
@@ -47,7 +50,6 @@ export default function Home() {
   async function runEvaluation() {
     if (!checklistId || !transcriptText.trim() || !checklistLocked) return;
     setLoading(true);
-    setRunError(null);
     setResult(null);
     try {
       const res = await fetch("/api/evaluate/stream", {
@@ -93,7 +95,11 @@ export default function Home() {
         }
       }
     } catch (err) {
-      setRunError(err instanceof Error ? err.message : String(err));
+      notifications.show({
+        color: "red",
+        title: "Evaluation failed",
+        message: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setLoading(false);
     }
@@ -102,82 +108,107 @@ export default function Home() {
   const canRun = !!checklistId && !!transcriptText.trim() && checklistLocked;
 
   return (
-    <Container size="xl" py="xl">
-      <Title order={1} mb="xs">
-        Transcript Checklist QA
-      </Title>
-      <Text c="dimmed" mb="lg">
-        Paste a two-person transcript, save your checklist, then run the review.
-      </Text>
+    <div className="app-shell">
+      <Container size="xl" pt="xl" pb="md" style={{ flexShrink: 0, width: "100%" }}>
+        <Title order={1} mb={4}>
+          Transcript Checklist QA
+        </Title>
+        <Text c="dimmed" size="sm">
+          Paste a two-person transcript, save your checklist, then run the review.
+        </Text>
 
-      {loadError && (
-        <Alert color="red" mb="md" title="Could not load checklists">
-          {loadError}
-        </Alert>
-      )}
+        {loadError && (
+          <Alert color="red" mt="md" title="Could not load checklists">
+            {loadError}
+          </Alert>
+        )}
+      </Container>
 
-      <Grid mb="lg">
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Paper withBorder p="lg" radius="md" h="100%">
-            <div>
-              <Group justify="space-between" mb={4}>
-                <Text size="sm" fw={500}>
-                  Transcript
-                </Text>
-                <FileButton onChange={handleFileUpload} accept=".txt,.json">
-                  {(props) => (
-                    <Button variant="subtle" size="xs" {...props}>
-                      Upload file
+      <Container size="xl" pb="xl" style={{ flex: 1, minHeight: 0, width: "100%", display: "flex" }}>
+        <div className="two-col-row">
+          <div className="two-col">
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              style={{ height: "100%", display: "flex", flexDirection: "column" }}
+            >
+              <Tabs.List style={{ flexShrink: 0 }}>
+                <Tabs.Tab value="live">Live Call</Tabs.Tab>
+                <Tabs.Tab value="paste" disabled={callActive}>
+                  Paste / Upload
+                </Tabs.Tab>
+              </Tabs.List>
+
+              <Tabs.Panel value="live" pt="md" style={{ flex: 1, minHeight: 0 }}>
+                <LiveCall
+                  checklistLocked={checklistLocked}
+                  onActiveChange={setCallActive}
+                  onCallEnd={(text) => {
+                    setTranscriptText(text);
+                    setResult(null);
+                    setActiveTab("paste");
+                  }}
+                />
+              </Tabs.Panel>
+
+              <Tabs.Panel value="paste" pt="md" style={{ flex: 1, minHeight: 0 }}>
+                <Paper withBorder p="lg" radius="md" h="100%" style={{ display: "flex", flexDirection: "column" }}>
+                  <Group justify="space-between" mb={4} style={{ flexShrink: 0 }}>
+                    <Text size="sm" fw={500}>
+                      Transcript
+                    </Text>
+                    <FileButton onChange={handleFileUpload} accept=".txt,.json">
+                      {(props) => (
+                        <Button variant="subtle" size="xs" {...props}>
+                          Upload file
+                        </Button>
+                      )}
+                    </FileButton>
+                  </Group>
+                  <Textarea
+                    placeholder={PLACEHOLDER}
+                    value={transcriptText}
+                    onChange={(e) => setTranscriptText(e.currentTarget.value)}
+                    style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+                    styles={{
+                      wrapper: { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" },
+                      input: { fontFamily: "monospace", fontSize: 13, flex: 1, height: "100%", resize: "none" },
+                    }}
+                  />
+                  <Text size="xs" c="dimmed" mt={4} style={{ flexShrink: 0 }}>
+                    One line per turn: <code>Speaker: text</code> — or paste a JSON array of {"{speaker, text}"}. Or
+                    finish a live call to fill this in automatically.
+                  </Text>
+
+                  <Stack gap={4} mt="md" align="flex-end" style={{ flexShrink: 0 }}>
+                    <Button onClick={runEvaluation} loading={loading} disabled={!canRun}>
+                      Run Evaluation
                     </Button>
-                  )}
-                </FileButton>
-              </Group>
-              <Textarea
-                placeholder={PLACEHOLDER}
-                autosize
-                minRows={14}
-                maxRows={28}
-                value={transcriptText}
-                onChange={(e) => setTranscriptText(e.currentTarget.value)}
-                styles={{ input: { fontFamily: "monospace", fontSize: 13 } }}
-              />
-              <Text size="xs" c="dimmed" mt={4}>
-                One line per turn: <code>Speaker: text</code> — or paste a JSON array of {"{speaker, text}"}.
-              </Text>
-            </div>
+                    {!checklistLocked && (
+                      <Text size="xs" c="dimmed">
+                        Save the checklist on the right before running.
+                      </Text>
+                    )}
+                  </Stack>
+                </Paper>
+              </Tabs.Panel>
+            </Tabs>
+          </div>
 
-            <Stack gap={4} mt="md" align="flex-end">
-              <Button onClick={runEvaluation} loading={loading} disabled={!canRun}>
-                Run Evaluation
-              </Button>
-              {!checklistLocked && (
-                <Text size="xs" c="dimmed">
-                  Save the checklist on the right before running.
-                </Text>
-              )}
-            </Stack>
-          </Paper>
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <ChecklistEditor
-            key={checklistId ?? "none"}
-            checklists={checklists}
-            checklistId={checklistId}
-            onChecklistIdChange={setChecklistId}
-            onSaved={handleChecklistSaved}
-            result={result}
-            evaluating={loading}
-            onLockChange={setChecklistLocked}
-          />
-        </Grid.Col>
-      </Grid>
-
-      {runError && (
-        <Alert color="red" title="Evaluation failed">
-          {runError}
-        </Alert>
-      )}
-    </Container>
+          <div className="two-col">
+            <ChecklistEditor
+              key={checklistId ?? "none"}
+              checklists={checklists}
+              checklistId={checklistId}
+              onChecklistIdChange={setChecklistId}
+              onSaved={handleChecklistSaved}
+              result={result}
+              evaluating={loading}
+              onLockChange={setChecklistLocked}
+            />
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 }

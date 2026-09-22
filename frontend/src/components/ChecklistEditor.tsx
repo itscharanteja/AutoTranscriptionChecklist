@@ -142,10 +142,10 @@ export function ChecklistEditor({
     : null;
 
   return (
-    <Paper withBorder p="lg" radius="md" h="100%">
-      <Stack gap="md">
+    <Paper withBorder p="lg" radius="md" h="100%" style={{ display: "flex", flexDirection: "column" }}>
+      <Stack gap="md" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         {evaluating && (
-          <Group gap="xs">
+          <Group gap="xs" style={{ flexShrink: 0 }}>
             <Loader size="xs" />
             <Text size="sm" c="dimmed">
               Evaluating… {resultById.size}/{items.length} items
@@ -154,7 +154,7 @@ export function ChecklistEditor({
         )}
 
         {hasResults && result && (
-          <Text size="xs" c="dimmed">
+          <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
             {result.model} took {result.elapsed_seconds} secs to evaluate
           </Text>
         )}
@@ -166,11 +166,12 @@ export function ChecklistEditor({
           value={checklistId}
           onChange={(value) => value && onChecklistIdChange(value)}
           disabled={checklists.length === 0}
+          style={{ flexShrink: 0 }}
         />
 
         {locked ? (
           <>
-            <Group justify="space-between">
+            <Group justify="space-between" style={{ flexShrink: 0 }}>
               <Text fw={600}>{name}</Text>
               {counts && (
                 <Group gap={6}>
@@ -187,7 +188,7 @@ export function ChecklistEditor({
               )}
             </Group>
 
-            <Stack gap={6}>
+            <Stack gap={6} style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
               {items.map((item) => {
                 const itemResult = resultById.get(item.id);
                 const status = itemResult?.status;
@@ -235,53 +236,60 @@ export function ChecklistEditor({
             </Stack>
 
             {hasResults ? (
-              <Group justify="flex-end">
+              <Group justify="flex-end" style={{ flexShrink: 0 }}>
                 <Button variant="light" onClick={() => setLocked(false)}>
                   Edit checklist
                 </Button>
               </Group>
             ) : (
-              <Text size="xs" c="dimmed">
+              <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                 Checklist saved. Run an evaluation on the left to see results here.
               </Text>
             )}
           </>
         ) : (
           <>
-            <TextInput label="Checklist name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
+            <TextInput
+              label="Checklist name"
+              value={name}
+              onChange={(e) => setName(e.currentTarget.value)}
+              style={{ flexShrink: 0 }}
+            />
 
-            <Stack gap="xs">
-              <Text size="sm" fw={500}>
+            <Stack gap="xs" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <Text size="sm" fw={500} style={{ flexShrink: 0 }}>
                 Items
               </Text>
-              {items.map((item) => (
-                <Group key={item.key} align="flex-start" gap="xs" wrap="nowrap">
-                  <TextInput
-                    value={item.id}
-                    onChange={(e) => updateItem(item.key, { id: e.currentTarget.value })}
-                    placeholder="id"
-                    w={130}
-                    styles={{ input: { fontFamily: "monospace", fontSize: 12 } }}
-                  />
-                  <Textarea
-                    value={item.description}
-                    onChange={(e) => updateItem(item.key, { description: e.currentTarget.value })}
-                    placeholder="Checklist item description"
-                    autosize
-                    minRows={1}
-                    style={{ flex: 1 }}
-                  />
-                  <ActionIcon color="red" variant="subtle" onClick={() => removeItem(item.key)} title="Remove item">
-                    ×
-                  </ActionIcon>
-                </Group>
-              ))}
-              <Button variant="light" size="xs" onClick={addItem}>
+              <Stack gap="xs" style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+                {items.map((item) => (
+                  <Group key={item.key} align="flex-start" gap="xs" wrap="nowrap">
+                    <TextInput
+                      value={item.id}
+                      onChange={(e) => updateItem(item.key, { id: e.currentTarget.value })}
+                      placeholder="id"
+                      w={130}
+                      styles={{ input: { fontFamily: "monospace", fontSize: 12 } }}
+                    />
+                    <Textarea
+                      value={item.description}
+                      onChange={(e) => updateItem(item.key, { description: e.currentTarget.value })}
+                      placeholder="Checklist item description"
+                      autosize
+                      minRows={1}
+                      style={{ flex: 1 }}
+                    />
+                    <ActionIcon color="red" variant="subtle" onClick={() => removeItem(item.key)} title="Remove item">
+                      ×
+                    </ActionIcon>
+                  </Group>
+                ))}
+              </Stack>
+              <Button variant="light" size="xs" onClick={addItem} style={{ flexShrink: 0 }}>
                 + Add item
               </Button>
             </Stack>
 
-            <Group justify="space-between">
+            <Group justify="space-between" style={{ flexShrink: 0 }}>
               <Text size="xs" c={dirty ? "orange" : "dimmed"}>
                 {dirty ? "Unsaved changes" : "Saved"}
               </Text>

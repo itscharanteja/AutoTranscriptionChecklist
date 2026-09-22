@@ -2,7 +2,7 @@ import json
 import time
 from dataclasses import asdict
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,8 +11,9 @@ from pydantic import BaseModel
 
 from checklist_qa.checklist import find_checklist_path, list_checklists, load_checklist, save_checklist
 from checklist_qa.evaluator import evaluate_transcript, evaluate_transcript_stream
+from checklist_qa.live_call import generate_reply
 from checklist_qa.llm_client import BedrockClient
-from checklist_qa.models import ChecklistItem
+from checklist_qa.models import ChecklistItem, Turn
 from checklist_qa.transcript import parse_transcript_auto
 
 CHECKLISTS_DIR = Path("checklists")
@@ -41,6 +42,17 @@ class ChecklistItemIn(BaseModel):
 class SaveChecklistRequest(BaseModel):
     name: str
     items: List[ChecklistItemIn]
+
+
+class LiveCallTurnIn(BaseModel):
+    speaker: str
+    text: str
+
+
+class LiveCallReplyRequest(BaseModel):
+    turns: List[LiveCallTurnIn]
+    human_speaker: Optional[str] = None
+    bot_speaker: Optional[str] = None
 
 
 @app.get("/checklists")
@@ -118,3 +130,17 @@ def evaluate_stream(req: EvaluateRequest):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@app.post("/live-call/reply")
+def live_call_reply(req: LiveCallReplyRequest):
+    turns = [Turn(speaker=t.speaker, text=t.text) for t in req.turns]
+    try:
+        human_speaker, bot_speaker, reply = generate_reply(
+            _client, turns, human_speaker=req.human_speaker, bot_speaker=req.bot_speaker
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Model call failed: {exc}")
+    if not reply:
+        raise HTTPException(status_code=502, detail="Model returned an empty reply")
+    return {"human_speaker": human_speaker, "bot_speaker": bot_speaker, "reply": reply}
