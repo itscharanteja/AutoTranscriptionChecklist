@@ -1,19 +1,21 @@
+import asyncio
 import json
 import time
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from checklist_qa.checklist import find_checklist_path, list_checklists, load_checklist, save_checklist
 from checklist_qa.evaluator import evaluate_transcript, evaluate_transcript_stream
-from checklist_qa.live_call import generate_reply
+from checklist_qa.live_call import BOT_SPEAKER, HUMAN_SPEAKER, generate_reply
 from checklist_qa.llm_client import BedrockClient
 from checklist_qa.models import ChecklistItem, Turn
+from checklist_qa.nova_sonic_stt import NovaSonicSession
 from checklist_qa.transcript import parse_transcript_auto
 
 CHECKLISTS_DIR = Path("checklists")
@@ -51,8 +53,7 @@ class LiveCallTurnIn(BaseModel):
 
 class LiveCallReplyRequest(BaseModel):
     turns: List[LiveCallTurnIn]
-    human_speaker: Optional[str] = None
-    bot_speaker: Optional[str] = None
+    scenario_id: Optional[str] = None
 
 
 @app.get("/checklists")
@@ -136,11 +137,51 @@ def evaluate_stream(req: EvaluateRequest):
 def live_call_reply(req: LiveCallReplyRequest):
     turns = [Turn(speaker=t.speaker, text=t.text) for t in req.turns]
     try:
-        human_speaker, bot_speaker, reply = generate_reply(
-            _client, turns, human_speaker=req.human_speaker, bot_speaker=req.bot_speaker
-        )
+        scenario_id, reply = generate_reply(_client, turns, scenario_id=req.scenario_id)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Model call failed: {exc}")
     if not reply:
         raise HTTPException(status_code=502, detail="Model returned an empty reply")
-    return {"human_speaker": human_speaker, "bot_speaker": bot_speaker, "reply": reply}
+    return {"scenario_id": scenario_id, "human_speaker": HUMAN_SPEAKER, "bot_speaker": BOT_SPEAKER, "reply": reply}
+
+
+@app.websocket("/live-call/stt")
+async def live_call_stt(websocket: WebSocket):
+    await websocket.accept()
+    session = NovaSonicSession()
+    try:
+        await session.start()
+    except Exception as exc:
+        await websocket.send_json({"type": "error", "message": f"Could not start Nova Sonic session: {exc}"})
+        await websocket.close()
+        return
+
+    async def forward_transcripts():
+        try:
+            async for text in session.transcripts():
+                await websocket.send_json({"type": "transcript", "text": text})
+            await websocket.send_json({"type": "session_ended"})
+        except Exception:
+            pass  # client likely already disconnected
+
+    forward_task = asyncio.create_task(forward_transcripts())
+    try:
+        while True:
+            data = await websocket.receive_bytes()
+            await session.send_audio(data)
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        try:
+            await websocket.send_json({"type": "error", "message": str(exc)})
+        except Exception:
+            pass
+    finally:
+        # Close the Nova Sonic session first so its reader task winds down
+        # naturally (feeding forward_task its final sentinel) instead of
+        # being cancelled out from under an in-flight receive.
+        await session.close()
+        try:
+            await asyncio.wait_for(forward_task, timeout=2)
+        except (asyncio.TimeoutError, asyncio.CancelledError):
+            forward_task.cancel()

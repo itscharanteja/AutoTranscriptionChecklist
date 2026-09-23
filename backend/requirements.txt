@@ -3,3 +3,6 @@ requests
 boto3
 fastapi
 uvicorn[standard]
+aws-sdk-bedrock-runtime
+smithy-aws-core
+awscrt

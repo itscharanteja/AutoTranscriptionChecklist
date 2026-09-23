@@ -24,9 +24,11 @@ frontend/           Next.js + Mantine web app
 
 ### Backend
 
+Requires Python 3.12+ (needed for the Nova Sonic bidirectional streaming SDK).
+
 ```bash
 cd backend
-python3 -m venv .venv
+python3.12 -m venv .venv   # or: pyenv install 3.12 && ~/.pyenv/versions/3.12.*/bin/python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -54,6 +56,13 @@ npm install
 ## Usage
 
 ### Web app
+
+```bash
+# both servers at once (requires backend/.venv and frontend/node_modules to already exist)
+./start.sh
+```
+
+Or run them separately:
 
 ```bash
 # terminal 1 — backend API (from backend/, with venv activated)
@@ -120,3 +129,4 @@ items:
 - Bedrock calls use the Converse API with a forced tool call to get structured `{status, evidence}` output directly — no free-text JSON parsing needed. Ollama calls use `format: "json"` mode instead.
 - Checklist items should be concrete and name the specific speaker (e.g. "The AGENT explicitly says X") — small/cheap models judge vague, compound criteria unreliably, as seen when testing `qwen3:1.7b` on this project.
 - The web app's backend API (`server.py`) currently uses your default/root AWS credentials — for anything beyond local dev, set up a dedicated IAM identity scoped to `bedrock:InvokeModel`/`Converse` only.
+- The Web Speech API used for live captions needs Chrome or Edge — it streams audio to a Google speech service under the hood, which Brave blocks and Firefox doesn't implement at all.

@@ -76,28 +76,12 @@ _REPLY_TOOL = {
             "json": {
                 "type": "object",
                 "properties": {
-                    "human_speaker": {
-                        "type": "string",
-                        "description": (
-                            "Short role label for the FIRST speaker -- whoever asked the question or made "
-                            "the statement you are now responding to, e.g. 'Customer' or 'Doctor'."
-                        ),
-                    },
-                    "speaker": {
-                        "type": "string",
-                        "description": (
-                            "Short role label for the SECOND speaker -- you, the one giving the reply -- "
-                            "chosen as the natural counterpart to human_speaker, e.g. if human_speaker is "
-                            "'Doctor' this should be 'Patient', or if human_speaker is 'Customer' this "
-                            "should be 'Agent'. It must be a DIFFERENT role than human_speaker."
-                        ),
-                    },
                     "reply": {
                         "type": "string",
                         "description": "The one or two sentence spoken reply itself, in character.",
                     },
                 },
-                "required": ["human_speaker", "speaker", "reply"],
+                "required": ["reply"],
             }
         },
     }
