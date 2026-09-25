@@ -74,6 +74,15 @@ cd frontend && npm run dev
 
 Open http://localhost:3000. Pick a checklist, edit/save it, paste a transcript, and run the evaluation — results stream in live as each item is judged.
 
+### Letting someone else test it
+
+```bash
+brew install cloudflared   # one-time
+./host-for-testing.sh
+```
+
+Prints a public HTTPS URL to share. This uses Cloudflare's free "quick tunnel" (no account needed) — one tunnel for the frontend, one for the backend, since the browser talks to the backend directly over a WebSocket for live transcription and needs its own public URL too. Stop your own `start.sh`/manual servers first — Next.js won't run a second dev server for the same project even on a different port. The URL is temporary and changes every run.
+
 ### CLI (batch)
 
 ```bash
