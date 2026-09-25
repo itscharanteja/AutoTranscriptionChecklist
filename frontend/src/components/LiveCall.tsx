@@ -81,9 +81,11 @@ interface Props {
   checklistLocked: boolean;
   onCallEnd: (transcriptText: string) => void;
   onActiveChange?: (active: boolean) => void;
+  onCallStart?: () => void;
+  onTranscriptUpdate?: (transcriptText: string) => void;
 }
 
-export function LiveCall({ checklistLocked, onCallEnd, onActiveChange }: Props) {
+export function LiveCall({ checklistLocked, onCallEnd, onActiveChange, onCallStart, onTranscriptUpdate }: Props) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [phase, setPhase] = useState<"idle" | "active" | "ended">("idle");
   const [botPending, setBotPending] = useState(false);
@@ -224,6 +226,10 @@ export function LiveCall({ checklistLocked, onCallEnd, onActiveChange }: Props) 
     }
   }
 
+  function emitTranscriptUpdate() {
+    onTranscriptUpdate?.(renderTranscript(turnsRef.current));
+  }
+
   function appendTurn(fromHuman: boolean, speaker: string, text: string) {
     const turn: Turn = { id: crypto.randomUUID(), speaker, fromHuman, text };
     turnsRef.current = [...turnsRef.current, turn];
@@ -233,6 +239,7 @@ export function LiveCall({ checklistLocked, onCallEnd, onActiveChange }: Props) 
     } else {
       lastBotLineRef.current = text;
     }
+    emitTranscriptUpdate();
   }
 
   // Creates (or updates in place) a single live-updating bubble for the
@@ -263,6 +270,7 @@ export function LiveCall({ checklistLocked, onCallEnd, onActiveChange }: Props) 
       turnsRef.current = turnsRef.current.map((t) => (t.id === id ? { ...t, text, pending: false } : t));
       setTurns(turnsRef.current);
       setNoAudioWarning(false);
+      emitTranscriptUpdate();
       return;
     }
     appendTurn(true, HUMAN_SPEAKER, text);
@@ -350,6 +358,7 @@ export function LiveCall({ checklistLocked, onCallEnd, onActiveChange }: Props) 
     if (!checklistLocked) return;
     if (unsupported) return;
 
+    onCallStart?.();
     setMicError(null);
     setNoAudioWarning(false);
     turnsRef.current = [];

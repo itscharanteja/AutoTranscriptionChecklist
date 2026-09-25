@@ -53,6 +53,7 @@ interface Props {
   result: EvaluateResponse | null;
   evaluating: boolean;
   onLockChange: (locked: boolean) => void;
+  callActive?: boolean;
 }
 
 // Rendered with key={checklistId} by the parent, so switching checklists remounts this
@@ -65,6 +66,7 @@ export function ChecklistEditor({
   result,
   evaluating,
   onLockChange,
+  callActive = false,
 }: Props) {
   const initialChecklist = checklists.find((c) => c.id === checklistId);
   const initialItems = initialChecklist ? toEditable(initialChecklist) : [];
@@ -165,7 +167,7 @@ export function ChecklistEditor({
           data={checklists.map((c) => ({ value: c.id, label: c.name }))}
           value={checklistId}
           onChange={(value) => value && onChecklistIdChange(value)}
-          disabled={checklists.length === 0}
+          disabled={checklists.length === 0 || callActive}
           style={{ flexShrink: 0 }}
         />
 
@@ -237,13 +239,20 @@ export function ChecklistEditor({
 
             {hasResults ? (
               <Group justify="flex-end" style={{ flexShrink: 0 }}>
-                <Button variant="light" onClick={() => setLocked(false)}>
+                <Button variant="light" onClick={() => setLocked(false)} disabled={callActive}>
                   Edit checklist
                 </Button>
               </Group>
             ) : (
               <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
-                Checklist saved. Run an evaluation on the left to see results here.
+                {callActive
+                  ? "Scoring live as the call progresses…"
+                  : "Checklist saved. Run an evaluation on the left to see results here."}
+              </Text>
+            )}
+            {callActive && hasResults && (
+              <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+                Scoring live — end the call to edit the checklist.
               </Text>
             )}
           </>

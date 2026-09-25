@@ -57,12 +57,14 @@ Four pieces, four jobs:
 
 > As a bonus, the browser also has its own quick (but less accurate) built-in speech-to-text, so words appear on screen instantly while you talk. Once the more accurate Speech AI catches up a moment later, it quietly corrects that same line instead of adding a second one.
 
+> The checklist panel scores itself live throughout the call (see below) — there's nothing extra to click. Since it's already scoring the conversation as it goes, the checklist can't be edited or swapped out until the call ends.
+
 ## How evaluation works
 
-1. You save a checklist (a list of things that should happen in the conversation).
-2. You click **Run Evaluation** on a transcript (from a live call, or pasted in directly).
-3. For **every** checklist item, the Backend asks the Text AI: _"Did this happen in the conversation?"_ — **all at once, in parallel**, not one at a time.
-4. Each answer (yes / no / unclear) streams back next to its checklist item as soon as it's ready, with a short quote as evidence.
+1. You save a checklist (a list of things that should happen in the conversation) — this locks it in and, for a live call, is what unlocks the **Start Call** button.
+2. **Live call:** as soon as a turn is confirmed (your line, or the patient's reply), the Browser sends the growing transcript-so-far to the Backend automatically, debounced so a fast back-and-forth doesn't trigger a flood of requests. **Pasted transcript:** you click **Run Evaluation** instead.
+3. Either way, for **every** checklist item, the Backend asks the Text AI: _"Did this happen in the conversation?"_ — **all at once, in parallel**, not one at a time.
+4. Each answer (yes / no / unclear) streams back next to its checklist item as soon as it's ready, with a short quote as evidence. During a live call this repeats automatically as the conversation grows, so items flip from unclear/no to yes in real time; a final pass runs the instant you click **End Call** so the very last line is included.
 
 Asking one at a time would mean waiting for each answer before asking the next — slow. Instead, the Backend spins up one thread per checklist item (see the diagram above) so every question runs at the same time. This is why a 6-item checklist takes about **1 second** instead of the ~5 seconds it would take asking one question after another.
 

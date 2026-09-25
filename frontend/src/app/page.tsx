@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Container, FileButton, Group, Paper, Stack, Tabs, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { ChecklistEditor } from "@/components/ChecklistEditor";
@@ -23,6 +23,22 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<string | null>("live");
   const [callActive, setCallActive] = useState(false);
 
+  const evalControllerRef = useRef<AbortController | null>(null);
+  const evalDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultRef = useRef<EvaluateResponse | null>(null);
+
+  function applyResult(value: EvaluateResponse | null) {
+    resultRef.current = value;
+    setResult(value);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (evalDebounceTimerRef.current) clearTimeout(evalDebounceTimerRef.current);
+      evalControllerRef.current?.abort();
+    };
+  }, []);
+
   useEffect(() => {
     fetch("/api/checklists")
       .then(async (res) => {
@@ -38,7 +54,7 @@ export default function Home() {
 
   function handleChecklistSaved(updated: Checklist) {
     setChecklists((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
-    setResult(null);
+    applyResult(null);
   }
 
   async function handleFileUpload(file: File | null) {
@@ -47,15 +63,32 @@ export default function Home() {
     setTranscriptText(text);
   }
 
-  async function runEvaluation() {
-    if (!checklistId || !transcriptText.trim() || !checklistLocked) return;
+  async function runEvaluationStream(text: string, opts: { keepPrevious: boolean; notifyOnError: boolean }) {
+    if (!checklistId || !text.trim() || !checklistLocked) return;
+
+    evalControllerRef.current?.abort();
+    const controller = new AbortController();
+    evalControllerRef.current = controller;
+
     setLoading(true);
-    setResult(null);
+    let current: EvaluateResponse =
+      opts.keepPrevious && resultRef.current
+        ? resultRef.current
+        : {
+            checklist_name: "",
+            model: "",
+            elapsed_seconds: 0,
+            transcript_id: "ui-submission",
+            source_path: "<pasted>",
+            results: [],
+          };
+
     try {
       const res = await fetch("/api/evaluate/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checklist_id: checklistId, transcript_text: transcriptText }),
+        body: JSON.stringify({ checklist_id: checklistId, transcript_text: text }),
+        signal: controller.signal,
       });
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
@@ -65,17 +98,10 @@ export default function Home() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let current: EvaluateResponse = {
-        checklist_name: "",
-        model: "",
-        elapsed_seconds: 0,
-        transcript_id: "ui-submission",
-        source_path: "<pasted>",
-        results: [],
-      };
 
       while (true) {
         const { value, done } = await reader.read();
+        if (evalControllerRef.current !== controller) return; // superseded mid-read
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
         const frames = buffer.split("\n\n");
@@ -87,22 +113,60 @@ export default function Home() {
           if (evt.type === "start") {
             current = { ...current, checklist_name: evt.checklist_name, model: evt.model };
           } else if (evt.type === "item") {
-            current = { ...current, results: [...current.results, evt] };
+            current = { ...current, results: [...current.results.filter((r) => r.id !== evt.id), evt] };
           } else if (evt.type === "done") {
             current = { ...current, elapsed_seconds: evt.elapsed_seconds };
           }
-          setResult({ ...current });
+          applyResult({ ...current });
         }
       }
     } catch (err) {
-      notifications.show({
-        color: "red",
-        title: "Evaluation failed",
-        message: err instanceof Error ? err.message : String(err),
-      });
+      if (controller.signal.aborted) return; // superseded or unmounted -- not a real failure
+      console.warn("Evaluation failed:", err);
+      if (opts.notifyOnError) {
+        notifications.show({
+          color: "red",
+          title: "Evaluation failed",
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
     } finally {
-      setLoading(false);
+      if (evalControllerRef.current === controller) {
+        evalControllerRef.current = null;
+        setLoading(false);
+      }
     }
+  }
+
+  function handleCallStart() {
+    if (evalDebounceTimerRef.current) {
+      clearTimeout(evalDebounceTimerRef.current);
+      evalDebounceTimerRef.current = null;
+    }
+    evalControllerRef.current?.abort();
+    evalControllerRef.current = null;
+    setLoading(false);
+    applyResult(null);
+    setTranscriptText("");
+  }
+
+  function handleLiveTranscriptUpdate(text: string) {
+    setTranscriptText(text);
+    if (evalDebounceTimerRef.current) clearTimeout(evalDebounceTimerRef.current);
+    evalDebounceTimerRef.current = setTimeout(() => {
+      evalDebounceTimerRef.current = null;
+      runEvaluationStream(text, { keepPrevious: true, notifyOnError: false });
+    }, 1200);
+  }
+
+  function handleCallEnd(text: string) {
+    if (evalDebounceTimerRef.current) {
+      clearTimeout(evalDebounceTimerRef.current);
+      evalDebounceTimerRef.current = null;
+    }
+    setTranscriptText(text);
+    setActiveTab("paste");
+    runEvaluationStream(text, { keepPrevious: true, notifyOnError: true });
   }
 
   const canRun = !!checklistId && !!transcriptText.trim() && checklistLocked;
@@ -143,11 +207,9 @@ export default function Home() {
                 <LiveCall
                   checklistLocked={checklistLocked}
                   onActiveChange={setCallActive}
-                  onCallEnd={(text) => {
-                    setTranscriptText(text);
-                    setResult(null);
-                    setActiveTab("paste");
-                  }}
+                  onCallStart={handleCallStart}
+                  onTranscriptUpdate={handleLiveTranscriptUpdate}
+                  onCallEnd={handleCallEnd}
                 />
               </Tabs.Panel>
 
@@ -181,7 +243,11 @@ export default function Home() {
                   </Text>
 
                   <Stack gap={4} mt="md" align="flex-end" style={{ flexShrink: 0 }}>
-                    <Button onClick={runEvaluation} loading={loading} disabled={!canRun}>
+                    <Button
+                      onClick={() => runEvaluationStream(transcriptText, { keepPrevious: false, notifyOnError: true })}
+                      loading={loading}
+                      disabled={!canRun}
+                    >
                       Run Evaluation
                     </Button>
                     {!checklistLocked && (
@@ -205,6 +271,7 @@ export default function Home() {
               result={result}
               evaluating={loading}
               onLockChange={setChecklistLocked}
+              callActive={callActive}
             />
           </div>
         </div>
